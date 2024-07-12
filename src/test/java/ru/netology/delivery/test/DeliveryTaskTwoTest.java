@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 import static com.codeborne.selenide.Selenide.*;
 import org.junit.jupiter.api.BeforeEach;
 
-public class DeliveryTest {
+public class DeliveryTaskTwoTest {
 
     @BeforeEach
     void setup() {
@@ -21,20 +21,25 @@ public class DeliveryTest {
     private String generateDate(long addDays, String pattern) {
         return LocalDate.now().plusDays(addDays).format(DateTimeFormatter.ofPattern(pattern));
     }
-    //LocalDate - формат для работы с датой
-    //plusDays - работает с разными значениями ( -/+/0)
 
     @Test
-    public void shouldBeSuccssfullForms() {
-        $("[data-test-id='city'] input").setValue("Владикавказ");
+    public void shouldBeFormsCompleted() {
+        String city = "Владивосток";
+        int dayAdd = 7;
+        $("[data-test-id='city'] input").setValue(city.substring(0, 2));
+        $$(".menu-item__control").findBy(Condition.text(city)).click();
         String planningDate = generateDate(3,"dd.MM.yyyy");
-        $("[data-test-id='date'] input").sendKeys(Keys.chord(Keys.SHIFT,Keys.HOME), Keys.BACK_SPACE);
-        $("[data-test-id='date'] input").setValue(planningDate);
+        $("[data-test-id='date'] input").click();
+        if (!generateDate(3, "MM").equals(generateDate(dayAdd, "MM"))){
+            $("[data-step='1']").click();
+        }
+        $$(".calendar__day").findBy(Condition.text(generateDate(dayAdd, "dd"))).click();
+        //$("[data-test-id='date'] input").setValue(planningDate);
         $("[data-test-id='name'] input").setValue("Иван Степанович");
         $("[data-test-id='phone'] input").setValue("+79215627565");
         $("[data-test-id='agreement']").click();
         $("button.button").click();
         $(".notification__content").shouldBe(Condition.visible, Duration.ofSeconds(15))
-                .shouldHave(Condition.text("Встреча успешно забронирована на " + planningDate));
+                .shouldHave(Condition.text("Встреча успешно забронирована на " + generateDate(dayAdd,"dd.MM.yyyy")));
     }
 }
